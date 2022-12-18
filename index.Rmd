@@ -1,0 +1,67 @@
+---
+title: "Divvy Bike Share User Analysis"
+author: "Ekeoma E. AGU"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup environment
+The packages for data cleaning and analysis are loaded
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(skimr)
+library(naniar)
+
+```
+
+## Get data
+Uploading all Divvy trip data from October 2021 - September 2022 (the past 12 months)
+
+```{r}
+# Get files from working directory
+data_files <- list.files(file.path(getwd(), "data"))
+
+for(i in 1:length(data_files)){
+  assign(paste0("month_", i),
+         read.csv(paste0(getwd(), "/data/", data_files[i])))
+}
+```
+
+## Review and Join dataframes to into one
+Here we verify that the column naming convention and data types are consistent across all twelve data files to ensure the accuracy of the data set. 
+
+```{r}
+glimpse(month_1)
+glimpse(month_2)
+glimpse(month_3)
+glimpse(month_4)
+glimpse(month_5)
+glimpse(month_6)
+glimpse(month_7)
+glimpse(month_8)
+glimpse(month_9)
+glimpse(month_10)
+glimpse(month_11)
+glimpse(month_12)
+```
+
+#### Combine all dataframes to one
+Now that we have verified that the field names are consistent across all twelve csv files, let's combine the data to one dataframe and view the first few rows.
+```{r}
+combined_trips <- bind_rows(month_1, month_2, month_3, month_4,
+                        month_5, month_6, month_7, month_8,
+                        month_9, month_10, month_11, month_12)
+
+head(combined_trips)
+```
+### Check for duplicate records
+Next we will check to verify that there are no duplicate records
+```{r}
+sum(duplicated(combined_trips))
+```
+This output shows that there are no duplicate values, each row of the trip record represent a unique trip.
