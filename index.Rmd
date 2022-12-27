@@ -65,3 +65,208 @@ Next we will check to verify that there are no duplicate records
 sum(duplicated(combined_trips))
 ```
 This output shows that there are no duplicate values, each row of the trip record represent a unique trip.
+
+Check shape of data frame to understand the total number of trip records collected over the period of interest.
+```{r}
+print(dim(combined_trips))
+
+number_of_records = dim(combined_trips)[1]
+```
+
+## Clean Data and Prepare for analysis
+#### Rename ride_id and rideable_type columns with a more descriptive names
+
+```{r}
+combined_trips <- combined_trips %>% 
+  rename(trip_id=ride_id, bike_id=rideable_type)
+
+glimpse(combined_trips)
+```
+
+#### Get a general overview of the data frame
+Get summary statistics and check for missing values as well as detect attributes with empty values.
+```{r}
+skim_without_charts(combined_trips)
+```
+
+#### Remove records without start or end station details
+
+```{r}
+all_valid_trips <- combined_trips %>% 
+  filter(end_station_id !="" & start_station_id !="")
+
+# Review the summary detail
+skim_without_charts(all_valid_trips)
+```
+
+
+#### What is the total number of valid trips
+```{r}
+# Number of valid trips
+num_of_valid_trips = nrow(all_valid_trips)
+
+num_of_valid_trips
+```
+
+#### What is the number of trips with missing details
+```{r}
+num_of_invalid_trips = number_of_records - num_of_valid_trips
+
+num_of_invalid_trips
+```
+
+#### What percentage of the trip records were invalid
+```{r}
+percent_of_invalid_trips = (num_of_invalid_trips/number_of_records)*100
+
+percent_of_invalid_trips
+```
+
+### Create the trip_duration and week_day fields
+
+```{r}
+
+all_valid_trips <- all_valid_trips %>% 
+  mutate(week_day = wday(started_at, label = TRUE), wday = wday(started_at))
+
+#all_valid_trips$week_day <- format(as.Date(all_valid_trips$started_at), "%A")
+all_valid_trips$trip_duration <-  round(as.numeric(difftime(all_valid_trips$ended_at, all_valid_trips$started_at))/60,2) 
+
+head(all_valid_trips)
+```
+
+#### What is the average trip duration?
+
+```{r}
+with(all_valid_trips, round(mean(trip_duration),1))
+```
+
+#### What is the proportion of user types?
+
+```{r}
+all_valid_trips |> 
+  group_by(member_casual) |> 
+  summarise(number_of_trips = n()) |> 
+  ggplot(aes(x=member_casual, y=number_of_trips, fill = member_casual)) +
+  geom_bar(stat = "identity") +
+  theme_minimal()+
+  ggtitle("Proportion of User Types by Number of Trips")+
+  xlab("")+ylab("")+theme(axis.line = element_line(color='black'))+
+  geom_text(aes(label=paste0(round((number_of_trips/1000000),2),"M ",
+                             paste0("(",round((number_of_trips/num_of_valid_trips)*100,1),"%",")"))))
+```
+
+#### What is the most used bike types by membership types?
+
+```{r}
+all_valid_trips %>% 
+  group_by(member_casual, bike_id) %>% 
+  summarise(avg_trip_duration = mean(trip_duration), number_of_trips = n(), .groups="keep") %>%
+  ggplot(aes(x=reorder(bike_id, -number_of_trips), y=number_of_trips, fill=member_casual))+
+  geom_bar(stat = "identity") +
+  theme_minimal()+
+  ggtitle("Most used Bikes by User Type")+
+  xlab("")+ylab("")+theme(axis.line = element_line(color='black'))+
+  geom_text(aes(label=paste0(round((number_of_trips/1000),0),"K")))+
+  coord_flip()+
+  facet_wrap(~member_casual)
+```
+
+#### What is the average trip duration by membership type?
+
+```{r}
+all_valid_trips %>% 
+  group_by(member_casual, bike_id) %>% 
+  summarise(avg_trip_duration = mean(trip_duration), number_of_trips = n(), .groups = "keep") %>% 
+  ggplot(aes(x=member_casual, y=avg_trip_duration, fill=bike_id))+
+  geom_bar(stat = "identity")+
+  theme_minimal()+
+  ggtitle("Trip Duration by User type per Bike type")+
+  xlab("")+ylab("")+theme(axis.line = element_line(color='black'))+
+  geom_text(aes(label=round(avg_trip_duration,1)))+
+  facet_wrap(~bike_id)
+```
+
+#### Which week day do casual riders have peak bike usage?
+
+```{r}
+all_valid_trips %>% 
+  filter(member_casual=="casual") |> 
+  group_by(week_day, wday) %>% 
+  summarise(avg_trip_duration = mean(trip_duration), number_of_trips = n()) %>% 
+  ggplot(aes(x=week_day, y=number_of_trips)) +
+  geom_bar(stat = "identity", fill = "sky blue") +
+  theme_minimal()+
+  ggtitle("Total trips per Weekday by Casual riders")+
+  xlab("")+ylab("")+theme(axis.line = element_line(color='black'))
+```
+
+#### Which week days do annual members have peak bike usage?
+
+```{r}
+all_valid_trips %>%
+  filter(member_casual=="member") %>%
+  group_by(week_day, wday) %>%
+  summarise(avg_trip_duration = mean(trip_duration), number_of_trips = n()) %>%
+  ggplot(aes(x=week_day, y=number_of_trips)) +
+  geom_bar(stat = "identity", fill = "#D5EA67") +
+  theme_minimal()+
+  ggtitle("Total trips per Weekday by Annual members")+
+  xlab("")+ylab("")+theme(axis.line = element_line(color='black'))
+```
+
+#### Which week days do the membership types record highest average trip duration?
+
+```{r}
+all_valid_trips %>% 
+  group_by(week_day, wday, member_casual) %>% 
+  summarise(avg_trip_duration = mean(trip_duration), number_of_trips = n()) %>% 
+  ggplot(aes(x=week_day, y=avg_trip_duration, fill=member_casual)) +
+  geom_bar(stat = "identity") +
+  theme_minimal()+
+  ggtitle("Avg. Trip duration per Weekday")+
+  xlab("")+ylab("")+theme(axis.line = element_line(color='black'))
+```
+
+#### What are the most used routes by the membership types?
+To evaluate this measure, there is need to create the route column
+
+```{r}
+all_valid_trips$route <- paste(all_valid_trips$start_station_name, "_to_", all_valid_trips$end_station_name)
+
+head(all_valid_trips$route)
+```
+
+#### Most used routes by casual riders
+
+```{r}
+all_valid_trips %>% 
+  filter(member_casual == "casual") |> 
+  group_by(route) %>% 
+  summarise(avg_trip_duration = mean(trip_duration), number_of_trips = n(), .groups = "keep") %>% 
+  arrange(-number_of_trips) |> 
+    head(5) |> 
+  ggplot(aes(x=reorder(route, +number_of_trips), y=number_of_trips))+
+  geom_bar(stat = "identity", fill="sky blue")+
+  theme_minimal()+
+  geom_text(aes(label=paste0(round((number_of_trips/1000),1),"K")))+
+  xlab("")+ylab("")+theme(axis.line = element_line(color='black'))+
+  coord_flip()
+```
+
+#### Most used routes by annual members
+
+```{r}
+all_valid_trips %>% 
+  filter(member_casual == "member") %>% 
+  group_by(route) %>% 
+  summarise(avg_trip_duration = mean(trip_duration), number_of_trips = n(), .groups = "keep") %>% 
+  arrange(-number_of_trips) %>% 
+    head(5) %>% 
+  ggplot(aes(x=reorder(route, +number_of_trips), y=number_of_trips))+
+  geom_bar(stat = "identity", fill="sky blue")+
+  theme_minimal()+
+  geom_text(aes(label=paste0(round((number_of_trips/1000),1),"K")))+
+  xlab("")+ylab("")+theme(axis.line = element_line(color='black'))+
+  coord_flip()
+```
