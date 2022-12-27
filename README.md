@@ -14,7 +14,7 @@ This project is the analysis of the **Google Data Analytics Professional Certica
 
 ## Steps of Analysis
 
-In this project, I intend to demostrate the step by step process of data analytics problems. Therefore, I will be going through the various stages of data analysis. The following tools and libraries were used to complete the analysis and visualization - `R Programming language`, `tidyverse`, `skimr`, `nania` and `PowerBI` for visualization.
+In this project, I intend to demostrate the step by step process of data analytics problems. Therefore, I will be going through the various stages of data analysis. The following tools and libraries were used to complete the analysis and visualization - `R Programming language`, `tidyverse`, `skimr`, `nania`, `ggplot2` and `PowerBI` for visualization.
 
 ### _Methodology_
 
@@ -430,6 +430,8 @@ all_valid_trips %>%
 ### Data Visualization
 
 Using the Microsoft PowerBI platform, I came up with the dashboard visualization below to enable top management to easily visualize the insights in the dataset at a glance, to guide decision making.
+
+The dynamic dashboard can be accessed [here](https://www.novypro.com/project/bike-share-user-analysis-by-ekeoma-agu)
 
 ![Analysis dashboard](img/dashboard.png "This is the dashboard visualization of the analysis")
 
