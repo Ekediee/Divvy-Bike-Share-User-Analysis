@@ -173,7 +173,7 @@ After cleaning the missing and empty values, a few questions comes to mind for f
 
 ### Exploratory Data Analysis
 
-At this point, I will be asking specific questions, and analysis the data to provide answers.
+At this point, I will be asking specific questions, and analyzing the data to provide answers.
 
 #### What is the total number of valid trips?
 
