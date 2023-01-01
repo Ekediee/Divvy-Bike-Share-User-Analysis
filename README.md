@@ -14,11 +14,11 @@ This project is the analysis of the **Google Data Analytics Professional Certica
 
 ## Steps of Analysis
 
-In this project, I intend to demostrate the step by step process of data analytics problems. Therefore, I will be going through the various stages of data analysis. The following tools and libraries were used to complete the analysis and visualization - `R Programming language`, `tidyverse`, `skimr`, `nania`, `ggplot2` and `PowerBI` for visualization.
+In this project, I intend to demonstrate the step by step process of data analytics problems. Therefore, I will be going through the various stages of data analysis. The following tools and libraries were used to complete the analysis and visualization - `R Programming language`, `tidyverse`, `skimr`, `nania`, `ggplot2` and `PowerBI` for visualization.
 
-### _Methodology_
+### _Stages of analysis_
 
-The steps of analysis includes
+These includes
 
 -  [Data Collection](#data-collection)
 -  [Data Preprocessing](#data-preprocessing)
