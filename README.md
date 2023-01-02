@@ -216,11 +216,11 @@ percent_of_invalid_trips
 
 The above results indicates that a total of 1.35 million records, which form 23.2% of the overrall trip records for the period were incorrectly captured.
 
-The ideal next thing to do will be to report this discovery to the management throught the team lead for further investigation on what went wrong with the incorrectly captured data, before continuing with the analysis.
+The ideal next thing to do will be to report this discovery to the management through the team lead for further investigation on what went wrong with the incorrectly captured data, before continuing with the analysis.
 
 ### Create new columns
 
-In order to better understand and make sense the trip data, two new columns (`trip_duration` and `week_day`) will be created.
+In order to better understand and make sense of the trip data, two new columns (`trip_duration` and `week_day`) will be created.
 
 ```r
 all_valid_trips <- all_valid_trips %>%
